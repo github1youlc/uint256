@@ -554,6 +554,17 @@ func checkNumberS(input string) error {
 	return nil
 }
 
+func MustFromBig(b *big.Int) *Int {
+	if b == nil {
+		return nil
+	}
+	z := &Int{}
+	if z.SetFromBig(b) {
+		panic("overflow")
+	}
+	return z
+}
+
 // Dec returns the decimal representation of z.
 func (z *Int) Dec() string {
 	if z.IsZero() {
