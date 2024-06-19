@@ -652,3 +652,50 @@ func (z *Int) Dec() string {
 	// skip leading zeroes by only using the 'used size' of buf
 	return string(out[pos-len(buf):])
 }
+
+func (z *Int) PrettyDec(separator byte) string {
+	if z.IsZero() {
+		return "0"
+	}
+	// See algorithm-description in Dec()
+	// This just also inserts comma while copying byte-for-byte instead
+	// of using copy().
+	var (
+		out     = []byte("0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
+		divisor = NewInt(10000000000000000000)
+		y       = new(Int).Set(z)     // copy to avoid modifying z
+		pos     = len(out) - 1        // position to write to
+		buf     = make([]byte, 0, 19) // buffer to write uint64:s to
+		comma   = 0
+	)
+	for {
+		var quot, rem Int
+		udivrem(quot[:], y[:], divisor, &rem)
+		y.Set(&quot) // Set Q for next loop
+		buf = strconv.AppendUint(buf[:0], rem.Uint64(), 10)
+		for j := len(buf) - 1; j >= 0; j-- {
+			if comma == 3 {
+				out[pos] = separator
+				pos--
+				comma = 0
+			}
+			out[pos] = buf[j]
+			comma++
+			pos--
+		}
+		if y.IsZero() {
+			break
+		}
+		// Need to do zero-padding if we have more iterations coming
+		for j := 0; j < 19-len(buf); j++ {
+			if comma == 3 {
+				out[pos] = separator
+				pos--
+				comma = 0
+			}
+			comma++
+			pos--
+		}
+	}
+	return string(out[pos+1:])
+}
