@@ -10,6 +10,7 @@ import (
 	"encoding/binary"
 	"math"
 	"math/bits"
+	"math/big"
 )
 
 // Int is represented as an array of 4 uint64, in little-endian order,
