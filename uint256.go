@@ -1276,3 +1276,21 @@ func (z *Int) Sqrt(x *Int) *Int {
 		z1, z2 = z2, z1
 	}
 }
+
+// CmpBig compares z and x and returns:
+//
+//	-1 if z <  x
+//	 0 if z == x
+//	+1 if z >  x
+func (z *Int) CmpBig(x *big.Int) (r int) {
+	// If x is negative, it's surely smaller (z > x)
+	if x.Sign() == -1 {
+		return 1
+	}
+	y := new(Int)
+	if y.SetFromBig(x) { // overflow
+		// z < x
+		return -1
+	}
+	return z.Cmp(y)
+}
